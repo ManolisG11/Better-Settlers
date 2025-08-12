@@ -11,8 +11,8 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: #0d1117;
-  font-family: system-ui, sans-serif;
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  font-family: 'Segoe UI', system-ui, sans-serif;
   color: #fff;
   overflow: hidden;
 }
@@ -21,49 +21,518 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  padding: 10px;
+  padding: 12px;
   box-sizing: border-box;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 0;
-  min-height: 50px;
+  padding: 8px 0;
+  position: relative;
 }
 
 h1 {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   margin: 0;
+  background: linear-gradient(90deg, #58a6ff, #238636);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
 }
 
 .stats {
-  font-size: 0.9rem;
-  color: #aaa;
+  font-size: 0.95rem;
+  color: #8b949e;
+  margin-top: 4px;
 }
 
 #toolbar {
   display: flex;
-  gap: 5px;
+  gap: 8px;
 }
 
 #toolbar button {
-  font-size: 0.8rem;
-  padding: 5px 10px;
+  font-size: 0.9rem;
+  padding: 6px 12px;
   border: none;
   border-radius: 6px;
-  background: #444;
-  color: white;
+  background: #21262d;
+  color: #c9d1d9;
   cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 #toolbar button:hover {
-  background: #555;
+  background: #30363d;
+  transform: translateY(-1px);
+}
+
+#toolbar button:active {
+  transform: translateY(1px);
+}
+
+#clearBtn {
+  background: #da3633;
+  color: white;
 }
 
 main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-height: 0;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  min-height: 0;
+  flex: 1;
+}
+
+.buttons button {
+  font-size: 1.8rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #238636, #2ea043);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+}
+
+.buttons button:hover {
+  background: linear-gradient(145deg, #2ea043, #3fb954);
+  transform: scale(1.03);
+}
+
+.buttons button:active {
+  background: linear-gradient(145deg, #196b2c, #238636);
+  transform: scale(0.98);
+}
+
+.chartWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  position: relative;
+  background: rgba(22, 27, 34, 0.7);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  border: 1px solid #30363d;
+}
+
+.chart-container {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+}
+
+#lastRollContainer {
+  text-align: center;
+  margin-top: 10px;
+  padding: 8px;
+  width: 100%;
+}
+
+#lastLabel {
+  font-size: 1rem;
+  color: #8b949e;
+  margin-bottom: 4px;
+}
+
+#last {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #58a6ff;
+  text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#statsSummary {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(33, 38, 45, 0.9);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: right;
+  border: 1px solid #30363d;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  z-index: 10;
+  min-width: 120px;
+}
+
+#statsSummary div {
+  margin: 6px 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #30363d;
+}
+
+#statsSummary div:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.stat-value {
+  color: #58a6ff;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.roll-animation {
+  animation: rollHighlight 0.8s ease-out;
+}
+
+@keyframes rollHighlight {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-height: 700px) {
+  .buttons button {
+    font-size: 1.5rem;
+  }
+  
+  #last {
+    font-size: 2.2rem;
+    height: 45px;
+  }
+  
+  header {
+    padding: 5px 0;
+  }
+  
+  h1 {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-height: 600px) {
+  .buttons button {
+    font-size: 1.3rem;
+  }
+  
+  #last {
+    font-size: 1.8rem;
+  }
+  
+  .chartWrap {
+    padding: 5px;
+  }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div>
+      <h1>Catan Dice Tracker</h1>
+      <div class="stats"><span id="total">0 rolls</span></div>
+    </div>
+    <div id="toolbar">
+      <button id="undoBtn">Undo</button>
+      <button id="clearBtn">Clear</button>
+    </div>
+  </header>
+  <main>
+    <div class="buttons" id="buttons"></div>
+    <div class="chartWrap">
+      <div class="chart-container">
+        <canvas id="chart"></canvas>
+      </div>
+      <div id="lastRollContainer">
+        <div id="lastLabel">Last Roll</div>
+        <div id="last">—</div>
+      </div>
+      <div id="statsSummary"></div>
+    </div>
+  </main>
+</div>
+<script>
+const STORAGE_KEY = 'catanDiceRolls';
+let rolls = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]';
+
+// Create buttons for dice values
+const btnContainer = document.getElementById('buttons');
+for (let n = 2; n <= 12; n++) {
+  const btn = document.createElement('button');
+  btn.textContent = n;
+  btn.dataset.value = n;
+  btn.onclick = () => {
+    rolls.push(n);
+    save();
+    updateUI(n);
+    
+    // Visual feedback for button press
+    btn.classList.add('active');
+    setTimeout(() => btn.classList.remove('active'), 150);
+    
+    // Animation for last roll display
+    const lastDisplay = document.getElementById('last');
+    lastDisplay.textContent = n;
+    lastDisplay.classList.remove('roll-animation');
+    void lastDisplay.offsetWidth; // Trigger reflow
+    lastDisplay.classList.add('roll-animation');
+  };
+  btnContainer.appendChild(btn);
+}
+
+// Chart initialization
+const ctx = document.getElementById('chart');
+let chart;
+
+function initChart() {
+  if (chart) chart.destroy();
+  
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      datasets: [{
+        label: 'Rolls',
+        data: getCounts(),
+        backgroundColor: '#238636',
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+        borderWidth: 1,
+        borderRadius: 5,
+        maxBarThickness: 40
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { 
+            color: '#8b949e',
+            stepSize: 1,
+            precision: 0,
+            font: {
+              weight: 'bold'
+            }
+          },
+          grid: {
+            color: 'rgba(240, 246, 252, 0.1)'
+          }
+        },
+        x: {
+          ticks: { 
+            color: '#c9d1d9',
+            font: {
+              weight: 'bold',
+              size: 12
+            }
+          },
+          grid: {
+            display: false
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(13, 17, 23, 0.9)',
+          titleFont: { weight: 'normal', size: 14 },
+          bodyFont: { weight: 'bold', size: 16 },
+          padding: 12,
+          borderColor: '#30363d',
+          borderWidth: 1,
+          titleColor: '#8b949e',
+          bodyColor: '#ffffff',
+          displayColors: false,
+          callbacks: {
+            title: function(context) {
+              return `Dice Roll: ${context[0].label}`;
+            },
+            label: function(context) {
+              return `Times rolled: ${context.raw}`;
+            }
+          }
+        },
+        datalabels: {
+          color: '#ffffff',
+          anchor: 'end',
+          align: 'top',
+          font: {
+            weight: 'bold',
+            size: 14
+          },
+          formatter: (value) => value > 0 ? value : ''
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+// Get roll counts for each value
+function getCounts() {
+  const counts = Array(11).fill(0);
+  rolls.forEach(r => counts[r-2]++);
+  return counts;
+}
+
+// Calculate statistics
+function getStats() {
+  if (rolls.length === 0) return null;
+  
+  const counts = getCounts();
+  const total = rolls.length;
+  
+  // Most rolled
+  let maxCount = 0;
+  let mostRolledValues = [];
+  counts.forEach((count, index) => {
+    if (count > maxCount) {
+      maxCount = count;
+      mostRolledValues = [index + 2];
+    } else if (count === maxCount) {
+      mostRolledValues.push(index + 2);
+    }
+  });
+  
+  // Least rolled (ignore zeros)
+  let minCount = Infinity;
+  let leastRolledValues = [];
+  counts.forEach((count, index) => {
+    if (count > 0 && count < minCount) {
+      minCount = count;
+      leastRolledValues = [index + 2];
+    } else if (count > 0 && count === minCount) {
+      leastRolledValues.push(index + 2);
+    }
+  });
+  
+  const average = (rolls.reduce((a, b) => a + b, 0) / total).toFixed(2);
+  
+  return {
+    total,
+    mostRolledValues,
+    leastRolledValues,
+    average
+  };
+}
+
+// Update UI elements
+function updateUI(lastRoll) {
+  document.getElementById('total').textContent = `${rolls.length} ${rolls.length === 1 ? 'roll' : 'rolls'}`;
+  
+  if (chart) {
+    chart.data.datasets[0].data = getCounts();
+    chart.update('none');
+  } else {
+    initChart();
+  }
+  
+  // Update stats summary
+  const statsSummary = document.getElementById('statsSummary');
+  const stats = getStats();
+  
+  if (stats) {
+    statsSummary.innerHTML = `
+      <div>Total: <span class="stat-value">${stats.total}</span></div>
+      <div>Avg: <span class="stat-value">${stats.average}</span></div>
+      <div>Most: <span class="stat-value">${stats.mostRolledValues.join(', ')}</span></div>
+      <div>Least: <span class="stat-value">${stats.leastRolledValues.join(', ')}</span></div>
+    `;
+  } else {
+    statsSummary.innerHTML = '';
+  }
+}
+
+// Save to localStorage
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(rolls));
+}
+
+// Button event handlers
+document.getElementById('undoBtn').onclick = () => {
+  if (rolls.length > 0) {
+    const lastRoll = rolls.pop();
+    save();
+    updateUI();
+    
+    // Update last roll display
+    const lastDisplay = document.getElementById('last');
+    lastDisplay.textContent = rolls.length ? rolls[rolls.length-1] : '—';
+  }
+};
+
+document.getElementById('clearBtn').onclick = () => {
+  if (rolls.length > 0 && confirm('Clear all rolls?')) {
+    rolls = [];
+    save();
+    updateUI();
+    document.getElementById('last').textContent = '—';
+  }
+};
+
+// Initialize
+updateUI();
+
+// Keep screen awake
+let wakeLock = null;
+
+async function requestWakeLock() {
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    
+    document.addEventListener('visibilitychange', async () => {
+      if (wakeLock !== null && document.visibilityState === 'visible') {
+        await requestWakeLock();
+      }
+    });
+  } catch (err) {
+    console.log('WakeLock not supported');
+  }
+}
+
+if ('wakeLock' in navigator) {
+  requestWakeLock();
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  const key = parseInt(e.key);
+  if (!isNaN(key) && key >= 2 && key <= 12) {
+    const btn = document.querySelector(`.buttons button[data-value="${key}"]`);
+    if (btn) btn.click();
+  } else if (e.key === 'z' && e.ctrlKey) {
+    document.getElementById('undoBtn').click();
+  } else if (e.key === 'Escape') {
+    document.getElementById('clearBtn').click();
+  }
+});
+</script>
+</body>
+</html>  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 10px;
