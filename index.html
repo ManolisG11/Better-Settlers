@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
-<title>Modern Catan Dice Tracker</title>
+<title>Catan Dice Tracker</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <style>
 html,body{
   margin:0;
@@ -48,12 +49,12 @@ h1{
 }
 main{
   flex:1;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  grid-template-rows:1fr;
-  gap:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 .buttons{
+  flex:1;
   display:grid;
   grid-template-columns:repeat(3,1fr);
   grid-template-rows:repeat(4,1fr);
@@ -64,6 +65,151 @@ main{
   border:none;
   border-radius:10px;
   background:#238636;
+  color:white;
+  font-weight:bold;
+}
+.chartWrap{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+canvas{
+  width:100% !important;
+  height:100% !important;
+}
+#last{
+  font-size:1.5rem;
+  margin-top:5px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div>
+      <h1>Catan Dice</h1>
+      <div class="stats"><span id="total">0 rolls</span></div>
+    </div>
+    <div id="toolbar">
+      <button id="undoBtn">Undo</button>
+      <button id="clearBtn">Clear</button>
+    </div>
+  </header>
+  <main>
+    <div class="buttons" id="buttons"></div>
+    <div class="chartWrap">
+      <canvas id="chart"></canvas>
+      <div id="last">—</div>
+    </div>
+  </main>
+</div>
+<script>
+const STORAGE_KEY='modernCatanRolls';
+let rolls=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+
+// Chart
+const ctx=document.getElementById('chart');
+const chart=new Chart(ctx,{
+  type:'bar',
+  data:{
+    labels:[2,3,4,5,6,7,8,9,10,11,12],
+    datasets:[{
+      label:'Rolls',
+      data:getCounts(),
+      backgroundColor:'#58a6ff'
+    }]
+  },
+  options:{
+    responsive:true,
+    maintainAspectRatio:false,
+    scales:{
+      y:{
+        beginAtZero:true,
+        ticks:{color:'#fff',stepSize:1},
+        precision:0
+      },
+      x:{
+        ticks:{color:'#fff'}
+      }
+    },
+    plugins:{
+      legend:{display:false},
+      datalabels:{
+        color:'#fff',
+        anchor:'end',
+        align:'start',
+        font:{weight:'bold'},
+        formatter:(value)=>value>0?value:''
+      }
+    }
+  },
+  plugins:[ChartDataLabels]
+});
+
+document.getElementById('total').textContent=`${rolls.length} rolls`;
+document.getElementById('last').textContent=rolls.length?rolls[rolls.length-1]:'—';
+
+const btnContainer=document.getElementById('buttons');
+for(let n=2;n<=12;n++){
+  const btn=document.createElement('button');
+  btn.textContent=n;
+  btn.onclick=()=>{
+    rolls.push(n);
+    save();
+    updateUI(n);
+  };
+  btnContainer.appendChild(btn);
+}
+
+document.getElementById('undoBtn').onclick=()=>{
+  if(rolls.length>0){
+    rolls.pop();
+    save();
+    updateUI();
+  }
+};
+document.getElementById('clearBtn').onclick=()=>{
+  if(confirm('Clear all rolls?')){
+    rolls=[];
+    save();
+    updateUI();
+  }
+};
+
+function getCounts(){
+  const c=Array(11).fill(0);
+  rolls.forEach(r=>c[r-2]++);
+  return c;
+}
+function updateUI(last){
+  document.getElementById('total').textContent=`${rolls.length} rolls`;
+  document.getElementById('last').textContent=last||'—';
+  chart.data.datasets[0].data=getCounts();
+  chart.update();
+}
+function save(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(rolls));
+}
+updateUI();
+
+// Keep screen awake
+let wakeLock=null;
+if('wakeLock' in navigator){
+  const requestWakeLock=async()=>{
+    try{
+      wakeLock=await navigator.wakeLock.request('screen');
+    }catch(e){console.log('WakeLock failed',e);}
+  };
+  requestWakeLock();
+  document.addEventListener('visibilitychange',()=>{
+    if(wakeLock===null && document.visibilityState==='visible')requestWakeLock();
+  });
+}
+</script>
+</body>
+</html>  background:#238636;
   color:white;
   font-weight:bold;
 }
