@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -7,63 +7,423 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <style>
-html,body{
-  margin:0;
-  padding:0;
-  height:100%;
-  background:#0d1117;
-  font-family:system-ui,sans-serif;
-  color:#fff;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #0d1117;
+  font-family: system-ui, sans-serif;
+  color: #fff;
+  overflow: hidden;
 }
-#app{
-  display:flex;
-  flex-direction:column;
-  height:100%;
-  padding:10px;
-  box-sizing:border-box;
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 10px;
+  box-sizing: border-box;
 }
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  min-height: 50px;
 }
-h1{
-  font-size:1.2rem;
-  margin:0;
+
+h1 {
+  font-size: 1.2rem;
+  margin: 0;
 }
-.stats{
-  font-size:0.9rem;
-  color:#aaa;
+
+.stats {
+  font-size: 0.9rem;
+  color: #aaa;
 }
-#toolbar{
-  display:flex;
-  gap:5px;
+
+#toolbar {
+  display: flex;
+  gap: 5px;
 }
-#toolbar button{
-  font-size:0.8rem;
-  padding:5px 8px;
-  border:none;
-  border-radius:6px;
-  background:#444;
-  color:white;
+
+#toolbar button {
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #444;
+  color: white;
+  cursor: pointer;
 }
-main{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+
+#toolbar button:hover {
+  background: #555;
 }
-.buttons{
-  flex:1;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(4,1fr);
-  gap:8px;
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
 }
-.buttons button{
-  font-size:1.5rem;
-  border:none;
-  border-radius:10px;
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 8px;
+  min-height: 0;
+  flex: 1;
+}
+
+.buttons button {
+  font-size: min(1.8rem, 7vw);
+  border: none;
+  border-radius: 10px;
+  background: #238636;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttons button:hover {
+  background: #2ea043;
+  transform: scale(1.03);
+}
+
+.buttons button:active {
+  background: #196b2c;
+  transform: scale(0.98);
+}
+
+.chartWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  position: relative;
+}
+
+.chart-container {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+}
+
+#last {
+  font-size: 2.2rem;
+  margin-top: 8px;
+  font-weight: bold;
+  color: #58a6ff;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#statsSummary {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+#statsSummary div {
+  margin: 3px 0;
+}
+
+#clearBtn {
+  background: #d03535;
+}
+
+#clearBtn:hover {
+  background: #e04545;
+}
+
+@media (max-height: 600px) {
+  .buttons button {
+    font-size: min(1.5rem, 6vw);
+  }
+  
+  #last {
+    font-size: 1.8rem;
+    height: 40px;
+  }
+  
+  header {
+    min-height: 40px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  main {
+    flex-direction: row;
+  }
+  
+  .buttons {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    flex: 0 0 60%;
+  }
+  
+  .chartWrap {
+    flex: 1;
+  }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div>
+      <h1>Catan Dice Tracker</h1>
+      <div class="stats"><span id="total">0 rolls</span></div>
+    </div>
+    <div id="toolbar">
+      <button id="undoBtn">Undo</button>
+      <button id="clearBtn">Clear</button>
+    </div>
+  </header>
+  <main>
+    <div class="buttons" id="buttons"></div>
+    <div class="chartWrap">
+      <div class="chart-container">
+        <canvas id="chart"></canvas>
+      </div>
+      <div id="last">—</div>
+      <div id="statsSummary"></div>
+    </div>
+  </main>
+</div>
+<script>
+const STORAGE_KEY = 'catanDiceRolls';
+let rolls = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]';
+
+// Create buttons for dice values
+const btnContainer = document.getElementById('buttons');
+for (let n = 2; n <= 12; n++) {
+  const btn = document.createElement('button');
+  btn.textContent = n;
+  btn.dataset.value = n;
+  btn.onclick = () => {
+    rolls.push(n);
+    save();
+    updateUI(n);
+    
+    // Visual feedback for button press
+    btn.classList.add('active');
+    setTimeout(() => btn.classList.remove('active'), 150);
+  };
+  btnContainer.appendChild(btn);
+}
+
+// Chart initialization
+const ctx = document.getElementById('chart');
+let chart;
+
+function initChart() {
+  if (chart) chart.destroy();
+  
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      datasets: [{
+        label: 'Rolls',
+        data: getCounts(),
+        backgroundColor: '#58a6ff',
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { 
+            color: '#fff',
+            stepSize: 1,
+            precision: 0
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        },
+        x: {
+          ticks: { 
+            color: '#fff',
+            font: {
+              weight: 'bold'
+            }
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          titleFont: { weight: 'normal' },
+          bodyFont: { weight: 'bold' },
+          padding: 10
+        },
+        datalabels: {
+          color: '#fff',
+          anchor: 'end',
+          align: 'top',
+          font: {
+            weight: 'bold',
+            size: 12
+          },
+          formatter: (value) => value > 0 ? value : ''
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+// Get roll counts for each value
+function getCounts() {
+  const counts = Array(11).fill(0);
+  rolls.forEach(r => counts[r-2]++);
+  return counts;
+}
+
+// Calculate statistics
+function getStats() {
+  if (rolls.length === 0) return null;
+  
+  const counts = getCounts();
+  const total = rolls.length;
+  const mostRolledValue = counts.indexOf(Math.max(...counts)) + 2;
+  const leastRolledValue = counts.indexOf(Math.min(...counts.filter(c => c > 0))) + 2;
+  const average = (rolls.reduce((a, b) => a + b, 0) / total).toFixed(2);
+  
+  return {
+    total,
+    mostRolledValue,
+    leastRolledValue,
+    average
+  };
+}
+
+// Update UI elements
+function updateUI(lastRoll) {
+  document.getElementById('total').textContent = `${rolls.length} rolls`;
+  document.getElementById('last').textContent = lastRoll || (rolls.length ? rolls[rolls.length-1] : '—');
+  
+  if (chart) {
+    chart.data.datasets[0].data = getCounts();
+    chart.update();
+  } else {
+    initChart();
+  }
+  
+  // Update stats summary
+  const statsSummary = document.getElementById('statsSummary');
+  const stats = getStats();
+  
+  if (stats) {
+    statsSummary.innerHTML = `
+      <div>Avg: ${stats.average}</div>
+      <div>Most: ${stats.mostRolledValue}</div>
+      <div>Least: ${stats.leastRolledValue}</div>
+    `;
+  } else {
+    statsSummary.innerHTML = '';
+  }
+}
+
+// Save to localStorage
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(rolls));
+}
+
+// Button event handlers
+document.getElementById('undoBtn').onclick = () => {
+  if (rolls.length > 0) {
+    rolls.pop();
+    save();
+    updateUI();
+  }
+};
+
+document.getElementById('clearBtn').onclick = () => {
+  if (rolls.length > 0 && confirm('Clear all rolls?')) {
+    rolls = [];
+    save();
+    updateUI();
+  }
+};
+
+// Initialize
+updateUI();
+
+// Keep screen awake
+let wakeLock = null;
+
+async function requestWakeLock() {
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    console.log('Screen wake lock active');
+    
+    wakeLock.addEventListener('release', () => {
+      console.log('Screen wake lock released');
+    });
+    
+    document.addEventListener('visibilitychange', async () => {
+      if (wakeLock !== null && document.visibilityState === 'visible') {
+        await requestWakeLock();
+      }
+    });
+  } catch (err) {
+    console.error('WakeLock error:', err.message);
+  }
+}
+
+if ('wakeLock' in navigator) {
+  requestWakeLock();
+}
+
+// Prevent context menu on buttons
+document.querySelectorAll('.buttons button').forEach(btn => {
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  const key = parseInt(e.key);
+  if (!isNaN(key) && key >= 2 && key <= 12) {
+    const btn = document.querySelector(`.buttons button[data-value="${key}"]`);
+    if (btn) btn.click();
+  } else if (e.key === 'z' && e.ctrlKey) {
+    document.getElementById('undoBtn').click();
+  } else if (e.key === 'Escape') {
+    document.getElementById('clearBtn').click();
+  }
+});
+</script>
+</body>
+</html>  border-radius:10px;
   background:#238636;
   color:white;
   font-weight:bold;
